@@ -4,12 +4,13 @@ Herdr dressed as [Termote](https://github.com/lamngockhuong/termote): its sessio
 left, its header over the panes, its colours and agent badges, in each of Termote's three UI
 styles (neutral, terminal, native) and following the system's light or dark mode. Every pane
 header can open that pane in Termote, copy its Termote link, or show a QR code to open it on a
-phone.
+phone. Files and Changes panels, forked from Herdr's own, open beside the panes from the header.
 
 ![Termote](preview.png)
 
 The mod runs `termote` (`url`, `status`) on this machine; it reads no files and uses no network
-itself.
+itself. The Files and Changes panels are `termote-files` and `termote-changes`, forks of Herdr's
+shipped `files` and `changes` mods that run `git` and list folders as Herdr's do.
 
 This file is the brief: enough to build the three layouts from an empty folder. The files next
 to it are one build of it.
@@ -28,15 +29,19 @@ They share one tree; left to right:
    in Termote. Other rows are `muted` and `hover` (`raised`) under the pointer.
 2. **The header**, 44px, over the panes: the Termote owl (20px, `foreground`), "Termote"
    (13px semibold), a 1px divider, the shown space's name, its machine, its branch with a
-   branch icon (12px, `dim`), and on the right the space's status badge. On `surface`; on
-   `canvas` in the terminal style. 1px `border` below.
+   branch icon (12px, `dim`), and on the right the space's status badge, then "Files" and
+   "Changes" buttons (28px, 12px, icon 14px, radius `--tm-radius-control`; `selected` and
+   `foreground` while their panel shows, else `muted`). On `surface`; on `canvas` in the
+   terminal style. 1px `border` below.
 3. **The panes**, the shown tab as cards on `canvas`: gap and padding 6/4/8px, radius
    10/6/16px (Termote's `--tm-radius-panel`) for neutral/terminal/native, terminal background,
    1px `border`, `accent` when focused, a single pane framed too. Terminal padding `[10, 8]`.
-4. **Each pane's header**, 30px on the terminal background, 1px `border` below, 12px: program
+4. **The side panel**, right of the panes, hidden until a header button opens it: 368px
+   (280–900, resizable), a stack of the `termote-files` and `termote-changes` mods.
+5. **Each pane's header**, 30px on the terminal background, 1px `border` below, 12px: program
    icon, program or title (medium), the folder's last part (`dim`; split on `/` and `\`), the
    agent's badge.
-5. **The status strip**, 24px on `chrome`, 1px `border` above, 11px `muted`: a dot and
+6. **The status strip**, 24px on `chrome`, 1px `border` above, 11px `muted`: a dot and
    "Termote: running on :7680 (hc)" / "Termote: stopped" / "Termote: not installed"; counts of
    working, "need you" and done agents with their dots; the layout's name on the right.
 
@@ -89,6 +94,10 @@ selection is Termote's translucent selection laid over the terminal background.
 - **Clicks:** a space's name selects it; a tab row selects its space and the tab. A pane
   header focuses its pane. `agent.next`/`agent.prev` follow the list's order (spaces, then their
   tabs).
+- **Files and Changes:** a header button shows the panel on that view; pressing the shown one
+  hides it. The choice is remembered per space (mod `localStorage`), as Herdr's tab bar does:
+  switching spaces restores that space's panel, or closes it if it never had one. The buttons
+  follow Herdr's shared `"workspace.panels"` (set by its welcome), both when unset.
 - **Narrow:** under 160px wide the list becomes a rail: one 34px cell per space with its
   initial and status dot; a click selects it, the tooltip names it.
 - **Pane header buttons**, shown while the pointer is on the header: Open in Termote, Copy
@@ -117,10 +126,14 @@ selection is Termote's translucent selection laid over the terminal background.
   "layouts/termote-<style>.svg"`, background `canvas`, terminal padding `[10, 8]`, 1px `border`
   dividers, the system title bar. Children: `sidebar` column (240px, min 40, max 480, on
   `chrome`) holding block `sessions`; `work` column (not resizable): block `header` (44px),
-  block `main` (padding = gap) with `{tab: "active", pane: {gap, radius, background:
-  "background", border, focus: accent, header: {content: {mod: "termote", props: {role:
-  "pane"}}, height: 30, position: "top", reveal: "always"}, lone: true}}`, block `status`
-  (24px). Only `gap`, `padding` and `radius` differ (6/10, 4/6, 8/16).
+  row `work-body` (padding = gap = the pane gap) holding block `main` with `{tab: "active",
+  pane: {gap, radius, background: "background", border, focus: accent, header: {content: {mod:
+  "termote", props: {role: "pane"}}, height: 30, position: "top", reveal: "always"}, lone:
+  true}}` and column
+  `panel` (`hidden`, 368px, min 280, max 900) holding stack `panel-body` (`active: "files"`)
+  of blocks `files` (`{mod: "termote-files"}`) and `changes` (`{mod: "termote-changes"}`), as
+  Herdr's `main` layout; then block `status` (24px). Only `gap`, `padding` and `radius`
+  differ (6/10, 4/6, 8/16).
 - **Themes** (`themes/termote-<style>-<light|dark>.json`): `background`, `foreground`,
   `selection`, `cursor`, `ansi[16]` and `colors` as in the table.
 - **One mod** (`mods/termote/`, `place: "none"`), by `props().role`: `sidebar`, `header`,
@@ -130,10 +143,16 @@ selection is Termote's translucent selection laid over the terminal background.
   bridge), one file per role, `brand.svg` (Termote's knockout owl, tinted), Lucide icons
   (`loader-circle`, `circle-alert`, `circle-check`, `circle-dot`, `external-link`, `copy`,
   `qr-code`).
+- **Two forked mods** (`place: "none"`): `mods/termote-files/` and `mods/termote-changes/`,
+  copied from herdr-app `v0.1.12-56-g816d205` `defaults/mods/{files,changes}` (Apache-2.0,
+  `LICENSE-APACHE` at the repo root) with asset paths moved to their own folder. Termote
+  features (markdown preview, delete to trash, …) are added to these copies over time; each
+  file's header says what changed from Herdr's.
 - **Shipped parts:** `mods/pane/{zoom,unzoom,close}.svg`, `mods/workspace-chrome/git-branch.svg`.
-- **herdr:** `spaces()`, `panes()`, `agents()`, `theme()`, `shared("layout")`, `props()`,
-  `setAgentOrder`, `run` (`space.select`, `tab.select`, `pane.focus`, `pane.zoom`,
-  `pane.close`), `openOverlay`, `closeOverlay`, `notify`, `exec`, `home()`;
+- **herdr:** `spaces()`, `panes()`, `agents()`, `theme()`, `layout()`, `shared("layout")`,
+  `shared("workspace.panels")`, `props()`, `setAgentOrder`, `run` (`space.select`,
+  `tab.select`, `pane.focus`, `pane.zoom`, `pane.close`, `layout.select`, `layout.show`,
+  `layout.hide`), `localStorage`, `openOverlay`, `closeOverlay`, `notify`, `exec`, `home()`;
   `cx.write_to_clipboard`, `cx.timer.every` (30 s), `.spin(1000)`, `.on_size_change`.
 - **Programs:** `termote url --group --tab --pane [--open | --qr]` and `termote status --json`,
   tried as `termote`, then `~/.local/bin/termote`, then
@@ -165,7 +184,7 @@ selection is Termote's translucent selection laid over the terminal background.
 
 ## Done when
 
-- `herdr-app check mods/termote` passes.
+- `herdr-app check` passes for `mods/termote`, `mods/termote-files` and `mods/termote-changes`.
 - `layout.switch` to each of the three loads it with no `layouts/termote-*.error`, and
   `ctrl-shift-l` cycles through them.
 - Switching the system between light and dark swaps each layout's theme; colours match
@@ -177,4 +196,6 @@ selection is Termote's translucent selection laid over the terminal background.
   Stopped, the strip says "stopped"; with `termote` off PATH and out of `~/.local`, Open gives
   the "termote not found" toast.
 - A pane in a space on another machine has no Termote buttons.
+- Files and Changes open and close the panel on that view; switching spaces restores each
+  space's choice.
 - `preview.png` is a real `herdr-app shot` of the neutral layout.
