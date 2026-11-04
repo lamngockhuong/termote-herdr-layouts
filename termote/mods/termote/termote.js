@@ -12,7 +12,9 @@ let found = null;
 
 function candidates() {
   const h = home();
-  return ["termote", `${h}/.local/bin/termote`, `${h}/.local/share/termote/current/bin/termote`];
+  return ["termote", `${h}/.local/bin/termote`, `${h}/.local/share/termote/current/bin/termote`,
+    // Windows: the installer's shim in %LOCALAPPDATA%\termote\bin is a .cmd.
+    "termote.cmd", `${h}/AppData/Local/termote/bin/termote.cmd`];
 }
 
 // Runs termote with args; null when no termote could be started.
