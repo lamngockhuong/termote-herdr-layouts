@@ -4,3 +4,5 @@ gpui-kit.d.ts
 # herdr-app shot's default file name
 herdr-shot.png
 .DS_Store
+# Local work notes (plans, reports, journals)
+plans/
