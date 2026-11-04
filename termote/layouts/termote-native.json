@@ -1,0 +1,109 @@
+{
+  "id": "root",
+  "type": "row",
+  "theme": {
+    "light": "termote-native-light",
+    "dark": "termote-native-dark"
+  },
+  "ui_font": "Geist",
+  "preview": "layouts/termote-native.svg",
+  "background": "canvas",
+  "terminal_padding": [
+    10,
+    8
+  ],
+  "divider": {
+    "width": 1,
+    "color": "border"
+  },
+  "children": [
+    {
+      "id": "sidebar",
+      "type": "column",
+      "size": {
+        "px": 240
+      },
+      "min": 40,
+      "max": 480,
+      "background": "chrome",
+      "children": [
+        {
+          "id": "sessions",
+          "type": "block",
+          "content": {
+            "mod": "termote",
+            "props": {
+              "role": "sidebar"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "work",
+      "type": "column",
+      "resizable": false,
+      "children": [
+        {
+          "id": "header",
+          "type": "block",
+          "size": {
+            "px": 44
+          },
+          "content": {
+            "mod": "termote",
+            "props": {
+              "role": "header"
+            }
+          }
+        },
+        {
+          "id": "main",
+          "type": "block",
+          "padding": 8,
+          "content": {
+            "tab": "active",
+            "pane": {
+              "gap": 8,
+              "radius": 16,
+              "background": "background",
+              "border": {
+                "width": 1,
+                "color": "border"
+              },
+              "focus": {
+                "width": 1,
+                "color": "accent"
+              },
+              "header": {
+                "content": {
+                  "mod": "termote",
+                  "props": {
+                    "role": "pane"
+                  }
+                },
+                "height": 30,
+                "position": "top",
+                "reveal": "always"
+              },
+              "lone": true
+            }
+          }
+        },
+        {
+          "id": "status",
+          "type": "block",
+          "size": {
+            "px": 24
+          },
+          "content": {
+            "mod": "termote",
+            "props": {
+              "role": "status"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

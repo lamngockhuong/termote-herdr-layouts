@@ -1,0 +1,6 @@
+# Written by herdr-app into every mod folder it loads
+jsconfig.json
+gpui-kit.d.ts
+# herdr-app shot's default file name
+herdr-shot.png
+.DS_Store
