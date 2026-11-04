@@ -29,12 +29,53 @@ herdr-app check ~/.config/herdr-app/mods/termote-changes
 herdr-app do layout.switch --name termote-neutral
 ```
 
+On Windows, in PowerShell (which has no `{a,b}` expansion; `herdr-app.exe` is a window app, so
+PowerShell only waits for it and shows its output when it is piped, hence `| Out-Host`):
+
+```powershell
+git clone https://github.com/lamngockhuong/termote-herdr-layouts
+foreach ($d in 'layouts', 'themes', 'mods') { Copy-Item "termote-herdr-layouts\termote\$d" "$HOME\.config\herdr-app" -Recurse -Force }
+foreach ($m in 'termote', 'termote-files', 'termote-changes') { herdr-app check "$HOME\.config\herdr-app\mods\$m" | Out-Host }
+herdr-app do layout.switch --name termote-neutral | Out-Host
+```
+
 `ctrl-shift-l` cycles through `termote-neutral`, `termote-terminal` and `termote-native`.
 Deleting the copied files removes them.
 
 The mod runs `termote url` and `termote status` on this machine; it reads no files and uses no
 network itself. The Files and Changes panels list the focused pane's folder and run `git`
 there, as Herdr's own panels do.
+
+## Update
+
+Ask your agent, saying to replace the copy you have (Herdr's `AGENTS.md` tells agents never to
+overwrite, so without it they add a renamed second copy):
+
+```text
+Read ~/.config/herdr-app/AGENTS.md, then update this layout in place: herdr.dev/layouts/lamngockhuong/termote
+Replace my installed termote-* layouts, themes and mods with the new files; don't rename them.
+```
+
+Or by hand, copying the new files over the old ones:
+
+```sh
+git -C termote-herdr-layouts pull
+cp -r termote-herdr-layouts/termote/{layouts,themes,mods} ~/.config/herdr-app/
+herdr-app check ~/.config/herdr-app/mods/termote
+herdr-app check ~/.config/herdr-app/mods/termote-files
+herdr-app check ~/.config/herdr-app/mods/termote-changes
+```
+
+On Windows, in PowerShell:
+
+```powershell
+git -C termote-herdr-layouts pull
+foreach ($d in 'layouts', 'themes', 'mods') { Copy-Item "termote-herdr-layouts\termote\$d" "$HOME\.config\herdr-app" -Recurse -Force }
+foreach ($m in 'termote', 'termote-files', 'termote-changes') { herdr-app check "$HOME\.config\herdr-app\mods\$m" | Out-Host }
+```
+
+Herdr reloads them within a second. Panel sizes and other clicks are kept (they live in
+`layouts/.state/`). A file removed from the repo stays in your copy until you delete it.
 
 ## Requirements
 
