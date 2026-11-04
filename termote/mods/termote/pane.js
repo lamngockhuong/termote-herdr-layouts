@@ -7,7 +7,8 @@ import { openOverlay, panes, props, run, theme } from "herdr";
 import { DIR, badge, label, programIcon, style } from "./style.js";
 import { copyLink, openInTermote, target } from "./termote.js";
 
-const base = (cwd) => (cwd ? cwd.replace(/\/+$/, "").split("/").pop() || "/" : "");
+// The folder's last part; Windows paths use backslashes.
+const base = (cwd) => (cwd ? cwd.replace(/[\\/]+$/, "").split(/[\\/]/).pop() || cwd : "");
 
 function button(t, id, icon, tip, action) {
   return div().id(id).p(3).rounded(style().control).text_color(t.dim).tooltip(tip)

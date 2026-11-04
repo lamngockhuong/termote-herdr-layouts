@@ -34,7 +34,8 @@ They share one tree; left to right:
    10/6/16px (Termote's `--tm-radius-panel`) for neutral/terminal/native, terminal background,
    1px `border`, `accent` when focused, a single pane framed too. Terminal padding `[10, 8]`.
 4. **Each pane's header**, 30px on the terminal background, 1px `border` below, 12px: program
-   icon, program or title (medium), the folder's last part (`dim`), the agent's badge.
+   icon, program or title (medium), the folder's last part (`dim`; split on `/` and `\`), the
+   agent's badge.
 5. **The status strip**, 24px on `chrome`, 1px `border` above, 11px `muted`: a dot and
    "Termote: running on :7680 (hc)" / "Termote: stopped" / "Termote: not installed"; counts of
    working, "need you" and done agents with their dots; the layout's name on the right.
@@ -136,7 +137,9 @@ selection is Termote's translucent selection laid over the terminal background.
   `cx.write_to_clipboard`, `cx.timer.every` (30 s), `.spin(1000)`, `.on_size_change`.
 - **Programs:** `termote url --group --tab --pane [--open | --qr]` and `termote status --json`,
   tried as `termote`, then `~/.local/bin/termote`, then
-  `~/.local/share/termote/current/bin/termote` (Herdr's PATH may lack `~/.local/bin`). The QR
+  `~/.local/share/termote/current/bin/termote` (Herdr's PATH may lack `~/.local/bin`), then on
+  Windows `termote.cmd` and `~/AppData/Local/termote/bin/termote.cmd` (the installer's shim is a
+  `.cmd`, which `exec("termote")` does not start). The QR
   comes from `termote url --qr`: the link on line 1, then the code in half blocks (`█` both
   modules light, `▀` top light, `▄` bottom light, space both dark, two rows per line, 2-module
   quiet zone), parsed back into a grid; each row draws runs of dark modules as one bar.
@@ -156,7 +159,9 @@ selection is Termote's translucent selection laid over the terminal background.
   that best. A link too long for a QR shows the link alone.
 - `herdr-app check` loads one copy with no props, so it renders nothing; check each role with
   data in the app.
-- Built and checked against herdr-app 0.1.12 (source `v0.1.12-56-g816d205`) and Termote 2.19.2.
+- Built and checked against herdr-app 0.1.12 (source `v0.1.12-56-g816d205`) and Termote 2.19.2;
+  also run on Windows 11 with Termote 2.14.0, whose `--mux` has no `hc` (only `herdr`), so its
+  links open Termote's home.
 
 ## Done when
 
