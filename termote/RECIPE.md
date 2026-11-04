@@ -98,6 +98,12 @@ selection is Termote's translucent selection laid over the terminal background.
   hides it. The choice is remembered per space (mod `localStorage`), as Herdr's tab bar does:
   switching spaces restores that space's panel, or closes it if it never had one. The buttons
   follow Herdr's shared `"workspace.panels"` (set by its welcome), both when unset.
+- **Markdown preview:** in Files, a `.md`, `.markdown` or `.mdx` file up to 256 KiB opens
+  rendered (`TextView.markdown`, selectable, 13px `foreground`), as Termote's file viewer
+  does. A 26px eye button in the panel's title bar ("Show source" / "Show preview";
+  `selected` while the preview shows) switches to the highlighted source and back; the choice
+  is remembered on this device (mod `localStorage` `markdownPreview`, on by default, as
+  Termote's setting). Larger Markdown files open as source only.
 - **Narrow:** under 160px wide the list becomes a rail: one 34px cell per space with its
   initial and status dot; a click selects it, the tooltip names it.
 - **Pane header buttons**, shown while the pointer is on the header: Open in Termote, Copy
@@ -145,7 +151,8 @@ selection is Termote's translucent selection laid over the terminal background.
   `qr-code`).
 - **Two forked mods** (`place: "none"`): `mods/termote-files/` and `mods/termote-changes/`,
   copied from herdr-app `v0.1.12-56-g816d205` `defaults/mods/{files,changes}` (Apache-2.0,
-  `LICENSE-APACHE` at the repo root) with asset paths moved to their own folder. Termote
+  `LICENSE-APACHE` at the repo root) with asset paths moved to their own folder, plus the
+  Markdown preview and Lucide `eye.svg` in `termote-files`. Termote
   features (markdown preview, delete to trash, …) are added to these copies over time; each
   file's header says what changed from Herdr's.
 - **Shipped parts:** `mods/pane/{zoom,unzoom,close}.svg`, `mods/workspace-chrome/git-branch.svg`.
@@ -198,4 +205,6 @@ selection is Termote's translucent selection laid over the terminal background.
 - A pane in a space on another machine has no Termote buttons.
 - Files and Changes open and close the panel on that view; switching spaces restores each
   space's choice.
+- A Markdown file in Files opens rendered; the eye button shows its source and back, and the
+  choice survives a restart.
 - `preview.png` is a real `herdr-app shot` of the neutral layout.

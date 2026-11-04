@@ -1,10 +1,11 @@
 // Forked from Herdr's `files` mod (herdr-app v0.1.12-56-g816d205, defaults/mods/files/main.js),
 // by the Herdr authors, Apache License 2.0 (LICENSE-APACHE at the repo root).
-// Changed for Termote: asset paths under mods/termote-files/.
+// Changed for Termote: asset paths under mods/termote-files/; Markdown files open as a rendered
+// preview, with a Preview button to show their source (as Termote's file viewer).
 
 // A lazy file browser for the focused pane's folder, with bounded read-only previews.
 import { View, div, svg } from "gpui-kit";
-import { v_flex, h_flex, Editor, EditorState } from "gpui-base";
+import { v_flex, h_flex, Editor, EditorState, TextView } from "gpui-base";
 import { spaces, panes, focused, exec, readTextFile, watchFolder, theme, settings, window } from "herdr";
 
 function location() {
@@ -16,6 +17,8 @@ function location() {
 const key = () => JSON.stringify(location());
 const LANG = { ts: "js", tsx: "js", mts: "js", cts: "js", jsx: "js", mjs: "js", toml: "yaml", jsonc: "json", svelte: "html", vue: "html" };
 const PER_FOLDER = 500, TOTAL = 5000;
+// Termote's isMarkdownPath and preview limit (pwa/src/utils/markdown-links.ts, highlight.ts).
+const MARKDOWN = /\.(md|markdown|mdx)$/i, PREVIEW_MAX = 256 * 1024;
 
 async function directory(path, on) {
   const windowsDirectory = async () => {
@@ -45,6 +48,8 @@ async function directory(path, on) {
 export default class Files extends View {
   init(_props, cx) {
     this.saved = new Map();
+    // Termote's markdownPreview setting: on unless turned off, remembered on this device.
+    this.preview = localStorage.getItem("markdownPreview") !== "false";
     this.entries = new Map(); this.folders = new Set(); this.pending = new Set(); this.marks = {};
     this.refresh(cx);
     cx.timer.every(10000, cx => this.refresh(cx));
@@ -132,7 +137,7 @@ export default class Files extends View {
   }
 
   show(path, cx) {
-    this.code?.release(); this.code = null; this.file = path; this.fileError = null;
+    this.code?.release(); this.code = null; this.file = path; this.fileError = null; this.markdown = null;
     if (!path || !cx) return;
     const context = this.context, root = this.root, on = this.on;
     cx.spawn(async cx => {
@@ -141,6 +146,7 @@ export default class Files extends View {
         if (this.file !== path || !this.current(context)) return;
         if (text === null) { this.fileError = "This file is no longer available"; return; }
         if (text.includes("\0")) { this.fileError = "Binary file · no text preview"; return; }
+        if (MARKDOWN.test(path) && text.length <= PREVIEW_MAX) this.markdown = text;
         const t = theme(), ext = path.includes(".") ? path.split(".").pop() : "txt";
         this.code = EditorState.new({ language: LANG[ext] ?? ext, readonly: true,
           value: text.length > 400000 ? text.slice(0, 400000) + "\n… (file truncated)" : text,
@@ -174,10 +180,17 @@ export default class Files extends View {
       .child(h_flex().h(42).flex_none().px(14).gap(8).items_center().border_b(1).border_color(t.border)
         .when(Boolean(this.file), el => el.child(div().id("files-back").w(20).cursor_pointer().text_color(t.muted).on_click((_e, cx) => { this.show(null); cx.notify(); }).child("←")))
         .child(div().font_semibold().child("Files"))
-        .child(div().flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim).child(this.file ?? this.root?.split(/[\\/]/).pop() ?? "")))
+        .child(div().flex_1().min_w(0).truncate().text_right().text_size(12).text_color(t.dim).child(this.file ?? this.root?.split(/[\\/]/).pop() ?? ""))
+        .when(Boolean(this.file) && this.markdown !== null, el => el.child(div().id("files-preview").size(26).flex_none().flex().items_center().justify_center().rounded(6).cursor_pointer()
+          .bg(this.preview ? t.selected : t.background).text_color(this.preview ? t.foreground : t.muted).hover(s => s.bg(t.hover).text_color(t.foreground))
+          .tooltip(this.preview ? "Show source" : "Show preview")
+          .on_click((_e, cx) => { this.preview = !this.preview; localStorage.setItem("markdownPreview", String(this.preview)); cx.notify(); })
+          .child(svg("mods/termote-files/eye.svg").size(15)))))
       .when(!this.file, el => el.child(v_flex().id("files-tree").flex_1().min_h(0).overflow_y_scrollbar().p(6).children(this.rows("", 0, [], t))
         .when(Boolean(this.error) || !this.entries.get("")?.length, el => el.child(div().p(8).text_size(12).text_color(t.dim).child(this.error || (this.loading ? "Loading files…" : this.root ? "No files" : "No folder"))))
         .when(this.limited, el => el.child(div().p(8).text_size(11).text_color(t.dim).child("File list limited to 500 entries per folder and 5,000 total")))))
-      .when(Boolean(this.file), el => el.child(this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
+      .when(Boolean(this.file), el => el.child(this.preview && this.markdown !== null
+        ? TextView.markdown(`files-markdown-${this.file}`, this.markdown).selectable().scrollable().flex_1().min_h(0).px(16).py(12).text_size(13).text_color(t.foreground)
+        : this.code ? Editor.new(this.code).flex_1().min_h(0) : div().p(12).text_color(t.dim).child(this.fileError || "Loading file…")));
   }
 }
